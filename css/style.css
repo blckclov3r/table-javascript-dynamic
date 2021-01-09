@@ -1,0 +1,20 @@
+body {
+  background: #f9f9f9;
+  height: 100%;
+}
+
+.parent-box {
+  margin-top: 50px;
+}
+
+.parent-box .box {
+  padding: 8px 35px;
+  font-size: 1.1rem;
+  color: #006937;
+  border: 10px solid green;
+}
+
+.parent-box .box table th {
+  vertical-align: middle;
+}
+/*# sourceMappingURL=style.css.map */
