@@ -1,30 +1,42 @@
-function rtl(element)
-{   
-    if(element.setSelectionRange){
-        element.setSelectionRange(0,0);
-    }
-}
-
-
-
 $(document).ready(function(){
+
+  
     
-    var ajax_data = [
-        {fname: "Aljun",fQuarter: "0",sQuarter: "0",avg: "0",remarks:"?"},
-        {fname: "Wilcris",fQuarter: "0",sQuarter: "0",avg: "0",remarks:"?"},
-        {fname: "Steph",fQuarter: "0",sQuarter: "0",avg: "0",remarks:"?"},
-        {fname: "NC",fQuarter: "0",sQuarter: "0",avg: "0",remarks:"?"}
+    let ajax_data = [
+        {fname: "Aljun",fQuarter: "100",sQuarter: "75",avg: "0",remark:"?"},
+        {fname: "Wilcris",fQuarter: "0",sQuarter: "0",avg: "0",remark:"?"},
+        {fname: "Steph",fQuarter: "0",sQuarter: "0",avg: "0",remark:"?"},
+        {fname: "NC",fQuarter: "0",sQuarter: "0",avg: "0",remark:"?"}
     ];
 
 
-    var random_id = function(){
-        let id_num = Math.random().toString().substr(2,3);
-        let id_str = Math.random().toString(36).substr(2);
-        console.log("id_num: "+id_num+", id_str: "+id_str);
-        return id_num+id_str;
-    }
+    var avgCall = function(){
 
-    var tbl = "";
+        $.each(ajax_data,function(index,val){
+            let fQuarter = $(".row_data").filter(':not([col_name]), [col_name="fQuarter"]').html();
+            let sQuarter = $(".row_data").filter(':not([col_name]), [col_name="sQuarter"]').html();
+            let avg = parseFloat((parseInt(fQuarter)+parseInt(sQuarter))/2);
+
+            if(avg == 0){
+                avg = 0;
+            }
+            
+            console.log(avg);
+            return avg;
+
+        });
+        
+    }
+   
+
+    // var random_id = function(){
+    //     let id_num = Math.random().toString().substr(2,3);
+    //     let id_str = Math.random().toString(36).substr(2);
+    //     console.log("id_num: "+id_num+", id_str: "+id_str);
+    //     return id_num+id_str;
+    // }
+
+    let tbl = "";
     tbl += '<table class="table table-hover">'
 
     tbl+='<thead>';
@@ -33,21 +45,36 @@ $(document).ready(function(){
                 tbl+='<th>First Quarter</th>';
                 tbl+='<th>Second Quarter</th>';
                 tbl+='<th>Average</th>';
-                tbl+='<th>Remarks</th>';
+                tbl+='<th>Remark</th>';
             tbl+='</tr>';
     tbl+='</thead>';
 
     tbl += '<tbody>';
 
         $.each(ajax_data,function(index,val){
-            let row_id = random_id();
 
-            tbl+='<tr row_id="'+row_id+'">';
-            tbl +='<td ><div class="row_data" edit_type="click" col_name="fname">'+val['fname']+'</div></td>';
-            tbl +='<td ><div class="row_data" edit_type="click" col_name="fQuarter">'+val['fQuarter']+'</div></td>';
-            tbl +='<td ><div class="row_data" edit_type="click" col_name="sQuarter">'+val['sQuarter']+'</div></td>';
-            tbl +='<td ><div class="row_data" edit_type="click" col_name="avg">'+val['avg']+'</div></td>';
-            tbl +='<td ><div class="row_data" edit_type="click" col_name="remarks">'+val['remarks']+'</div></td>';
+            let fQuarter = parseInt(val['fQuarter']);
+            let sQuarter = parseInt(val['sQuarter']);
+            let avg = parseFloat((fQuarter+sQuarter)/2);
+            let remark = "";
+
+            if(avg < 75 && avg != 0){
+                remark = "failed";
+            }else if(avg > 75){
+                remark = "passed";
+            }else{
+                remark = "?"
+            }
+
+            // let row_id = random_id();
+
+            // tbl+='<tr row_id="'+row_id+'">';
+            tbl+='<tr>'
+            tbl +='<td ><div class="row_data"  col_name="fname">'+val['fname']+'</div></td>';
+            tbl +='<td ><div class="row_data"  col_name="fQuarter">'+val['fQuarter']+'</div></td>';
+            tbl +='<td ><div class="row_data"  col_name="sQuarter">'+val['sQuarter']+'</div></td>';
+            tbl +='<td ><div class="row_data"  col_name="avg">'+avg+'</div></td>';
+            tbl +='<td ><div class="row_data"  col_name="remark">'+remark+'</div></td>';
 
             tbl+='</tr>';
         });
@@ -59,37 +86,33 @@ $(document).ready(function(){
     $(document).find('.tbl_user_data').html(tbl);
 
 
+    var selectAll = function(){
+        document.execCommand('selectAll',false,null);
+    }
+
     $(document).on('click','.row_data',function(event){
         event.preventDefault();
 
-        if($(this).attr('edit_type') == 'button'){
-            return false;
-        }
-        
         $(this).closest('div').attr('contenteditable','true');
         $(this).addClass('bg-input').css('padding','5px');
         $(this).focus();
-
+        selectAll(); 
     });
 
+  
+
+
     $(document).on('focusout','.row_data',function(event){
-
         event.preventDefault();
-
-       
-        if($(this).attr('edit_type')== 'button'){
-            return false;
-        }
-
 
         let tbl_row = $(this).closest('tr');
         let row_id = $(this).closest('tr').attr('row_id');
 
 
-        var tblArr = {};
+        let tblArr = {};
         let firstQuarter = 0;
         let secondQuarter = 0;
-        let avg =0;
+        let avg =0.0;
 
         tbl_row.find('.row_data').each(function(index,val){
             
@@ -99,8 +122,18 @@ $(document).ready(function(){
             tblArr[col_name] = col_val;
 
             firstQuarter = parseInt(tblArr["fQuarter"]);
-            secondQuarter = parseInt(tblArr["sQuarter"]);       
-            avg = parseInt((firstQuarter+secondQuarter)/2);
+            secondQuarter = parseInt(tblArr["sQuarter"]);  
+            if(firstQuarter == 0 || secondQuarter == 0){
+                return;
+            }     
+            avg = parseFloat((firstQuarter+secondQuarter)/2);
+            let remark = "";
+            if(avg < 75){
+                remark = "failed";
+            }else {
+                remark = "passed";
+            }
+            $(this).filter(':not([col_name]), [col_name="remark"]').html(remark);
             $(this).filter(':not([col_name]), [col_name="avg"]').html(avg);
 
         });
@@ -120,11 +153,9 @@ $(document).ready(function(){
         $('.post_msg').html('<pre>'+JSON.stringify(arr,null,2)+'</pre>');
 
 
-       
     
-
-    
-     
     });
+
+    avgCall();
 
 });
